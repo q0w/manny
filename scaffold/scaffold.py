@@ -1,4 +1,5 @@
 import os, sys, json
+import subprocess
 from django.conf import settings
 
 from scaffold.utils import default_kwargs
@@ -17,6 +18,7 @@ def get_integerfield(**kwargs):
         raise SystemExit('Provide field name...')
     return f"{kwargs['name']} = models.IntegerField(null={kwargs['null']}, default={kwargs['default']})"
 
+
 @default_kwargs(null=False, blank=False)
 def get_textfield(**kwargs):
     if not kwargs.get('name'):
@@ -33,13 +35,6 @@ class %s(models.Model):
         ordering = ['-id']
 """
 
-
-# MODEL_TEMPLATE = 'class {name}(models.Model):\n' \
-#                  '{line}' \
-#                  '    update_date = models.DateTimeField(auto_now=True)\n' \
-#                  '    create_date = models.DateTimeField(auto_now_add=True)\n' \
-#                  '    class Meta:\n' \
-#                  '        ordering = ["-id"]'
 
 class Scaffold:
     def __init__(self, app, model, fields):
@@ -58,7 +53,7 @@ class Scaffold:
         for app in self.app:
             if not os.path.exists(f'{self.SCAFFOLD_APP_DIRS}{app}'):
                 try:
-                    os.system(f'python manage.py startapp {app}')
+                    subprocess.Popen(['python', 'manage.py', 'startapp', app])
                 except Exception as e:
                     print(e)
 
@@ -84,16 +79,13 @@ class Scaffold:
                 if f'class {self.model}' in line:
                     # TODO: add logging
                     sys.exit(f'Model {self.model} already exists')
-                    # return
 
         fields = []
         for field in self.fields:
             new_field = self.get_field(field)
             fields.append(new_field)
-        # print(fields)
         with open(models_file_path, 'a') as mf:
             mf.write(MODEL_TEMPLATE % (self.model, '\n    '.join(field for field in fields)))
-            # mf.write(MODEL_TEMPLATE.format(name=self.model,line=''.join('    ' +field + '\n' for field in fields)))
 
     def execute(self):
         if not self.app:
