@@ -1,29 +1,7 @@
 import os, sys, json
 import subprocess
 from django.conf import settings
-
-from scaffold.utils import default_kwargs
-
-
-@default_kwargs(max_length=255, null=False, blank=False)
-def get_charfield(**kwargs):
-    if not kwargs.get('name'):
-        raise SystemExit('Provide field name...')
-    return f"{kwargs['name']} = models.CharField(max_length={kwargs['max_length']}, null={kwargs['null']}, blank={kwargs['blank']})"
-
-
-@default_kwargs(default='None', null=True)
-def get_integerfield(**kwargs):
-    if not kwargs.get('name'):
-        raise SystemExit('Provide field name...')
-    return f"{kwargs['name']} = models.IntegerField(null={kwargs['null']}, default={kwargs['default']})"
-
-
-@default_kwargs(null=False, blank=False)
-def get_textfield(**kwargs):
-    if not kwargs.get('name'):
-        raise SystemExit('Provide field name...')
-    return f"{kwargs['name']} = models.TextField(null={kwargs['null']}, default={kwargs['default']})"
+from scaffold.utils import FieldTemplate
 
 
 MODEL_TEMPLATE = """
@@ -59,17 +37,8 @@ class Scaffold:
 
     # TODO:add file deserialize support (json.load) ???
     def get_field(self, field):
-        # f = open(field)
         field = json.loads(field)
-        # print(field)
-        field_type = field.get('type')
-
-        if field_type.lower() == 'char':
-            return get_charfield(**field)
-        if field_type.lower() == 'int':
-            return get_integerfield(**field)
-        if field_type.lower() == 'text':
-            return get_textfield(**field)
+        return FieldTemplate().safe_replace(**field)
 
     def create_model(self):
         models_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.app[0]}/models.py'
