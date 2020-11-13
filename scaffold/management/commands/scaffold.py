@@ -15,11 +15,11 @@ class Command(BaseCommand):
         parser.add_argument('--model', dest='model', default=None, nargs='+')
 
     def handle(self, *args, **options):
-        if not options['app_name']:
+        if not options.get('app_name'):
             SystemExit('Provide app name...')
             # print('Provide app name...')
             # return
-        app_name = options['app_name'][0]
+        app_name = options['app_name']
         model_name = options['model'][0] if options.get('model') else None
         fields = options['model'][1:] if options.get('model') else None
         #print(fields)
