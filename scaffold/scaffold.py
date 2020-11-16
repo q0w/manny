@@ -27,12 +27,22 @@ class Scaffold:
 
     # TODO:add file deserialize support (json.load) ???
     def get_field(self, field):
-        field = json.loads(field)
-        if field.get('type') == 'Decimal':
-            return DecimalFieldTemplate().safe_replace(**field)
-        if field.get('type') == 'Char':
-            return CharFieldTemplate().safe_replace(**field)
-        return FieldTemplate().safe_replace(**field)
+        args = field.split(':')
+        if args[1] == 'Decimal':
+            options = ['name', 'type', 'max', 'places']
+            return DecimalFieldTemplate().safe_replace(**dict(zip(options, args)))
+        if args[1] == 'Char':
+            options = ['name', 'type', 'max']
+            return DecimalFieldTemplate().safe_replace(**dict(zip(options, args)))
+        options = ['name', 'type']
+        return FieldTemplate().safe_replace(**dict(zip(options, args)))
+
+        # field = json.loads(field)
+        # if field.get('type') == 'Decimal':
+        #     return DecimalFieldTemplate().safe_replace(**field)
+        # if field.get('type') == 'Char':
+        #     return CharFieldTemplate().safe_replace(**field)
+        # return FieldTemplate().safe_replace(**field)
 
     def create_model(self):
         models_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.app[0]}/models.py'
