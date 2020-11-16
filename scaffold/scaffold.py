@@ -1,16 +1,7 @@
 import os, sys, json
 import subprocess
 from django.conf import settings
-from scaffold.utils import FieldTemplate, DecimalFieldTemplate, CharFieldTemplate
-
-MODEL_TEMPLATE = """
-class %s(models.Model):
-    %s
-    update_date = models.DateTimeField(auto_now=True)
-    create_date = models.DateTimeField(auto_now_add=True)
-    class Meta:
-        ordering = ['-id']
-"""
+from scaffold.templates import FieldTemplate, DecimalFieldTemplate, CharFieldTemplate, ModelTemplate
 
 
 class Scaffold:
@@ -57,7 +48,7 @@ class Scaffold:
             new_field = self.get_field(field)
             fields.append(new_field)
         with open(models_file_path, 'a') as mf:
-            mf.write(MODEL_TEMPLATE % (self.model, '\n    '.join(field for field in fields)))
+            mf.write(ModelTemplate().substitute(name=self.model, field='\n    '.join(field for field in fields)))
 
     def execute(self):
         if not self.app:
