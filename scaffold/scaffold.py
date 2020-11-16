@@ -1,8 +1,7 @@
 import os, sys, json
 import subprocess
 from django.conf import settings
-from scaffold.utils import FieldTemplate
-
+from scaffold.utils import FieldTemplate, DecimalFieldTemplate, CharFieldTemplate
 
 MODEL_TEMPLATE = """
 class %s(models.Model):
@@ -38,6 +37,10 @@ class Scaffold:
     # TODO:add file deserialize support (json.load) ???
     def get_field(self, field):
         field = json.loads(field)
+        if field.get('type') == 'Decimal':
+            return DecimalFieldTemplate().safe_replace(**field)
+        if field.get('type') == 'Char':
+            return CharFieldTemplate().safe_replace(**field)
         return FieldTemplate().safe_replace(**field)
 
     def create_model(self):
