@@ -1,5 +1,6 @@
 import functools
 import ast
+import astor
 
 
 def default_kwargs(**defaultKwargs):
@@ -14,23 +15,37 @@ def default_kwargs(**defaultKwargs):
     return actual_decorator
 
 
-class FileScanner:
-    def __init__(self, file):
-        self.file = file
+class Walker(ast.NodeTransformer):
+    __imports = {}
 
-    def get_tree(self):
+    def __init__(self, file, options):
+        self.file = file
         with open(self.file, 'r') as f:
-            tree = ast.parse(f.read())
-        return tree
+            self.tree = ast.parse(f.read())
+        self.options = options
+        super().__init__()
+
+    def visit_Assign(self, node):
+        ast.NodeVisitor.generic_visit(self, node)
+        if node.targets[0].id == self.options['variable']:
+            node.value.elts.extend([ast.Constant(value=x, kind=None) for x in self.options['variable_values']])
+        return node
+
+    def visit_Import(self, node):
+        ast.NodeVisitor.generic_visit(self, node)
+        self.__imports['free'] = [x.name for x in node.names]
+
+    def visit_ImportFrom(self, node):
+        ast.NodeVisitor.generic_visit(self, node)
+        self.__imports[node.module] = [x.name for x in node.names]
 
     def get_imports(self):
-        imports = {}
-        for node in ast.walk(self.get_tree()):
-            if isinstance(node, ast.ImportFrom):
-                imports[node.module] = [x.name for x in node.names]
-            if isinstance(node, ast.Import):
-                imports[None] = [x.name for x in node.names]
-        return imports
+        self.visit(self.tree)
+        return self.__imports
+
+    def mutate(self):
+        with open(self.file, 'w') as f:
+            f.write(astor.to_source(self.visit(self.tree)))
 
     def get_assignments(self, variable):
         for node in ast.walk(self.get_tree()):

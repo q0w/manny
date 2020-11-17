@@ -1,8 +1,10 @@
-import os, sys, json
+import os
+import sys
+import json
 import subprocess
 from django.conf import settings
 from scaffold.kit.templates import FieldTemplate, DecimalFieldTemplate, CharFieldTemplate, ModelTemplate
-from scaffold.kit.utils import FileScanner
+from scaffold.kit.utils import Walker
 
 
 class Scaffold:
@@ -20,9 +22,11 @@ class Scaffold:
         if not os.path.exists(self.SCAFFOLD_APP_DIRS):
             raise Exception(f'SCAFFOLD_APP_DIRS "{self.SCAFFOLD_APP_DIRS}" does not exist')
         for app in self.app:
+            #TODO: можно почекать переменную apps в settings
             if not os.path.exists(f'{self.SCAFFOLD_APP_DIRS}{app}'):
                 try:
                     subprocess.Popen(['python', 'manage.py', 'startapp', app])
+                    #TODO: добавить приложение в сеттингс
                 except Exception as e:
                     print(e)
 
@@ -38,7 +42,7 @@ class Scaffold:
     def create_model(self):
         models_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.app[0]}/models.py'
         with open(models_file_path, 'r') as mf:
-            # check if model already exists
+            # check if model already exists - using ast
             for line in mf.readlines():
                 if f'class {self.model}' in line:
                     # TODO: add logging
