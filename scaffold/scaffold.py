@@ -1,7 +1,8 @@
 import os, sys, json
 import subprocess
 from django.conf import settings
-from scaffold.templates import FieldTemplate, DecimalFieldTemplate, CharFieldTemplate, ModelTemplate
+from scaffold.kit.templates import FieldTemplate, DecimalFieldTemplate, CharFieldTemplate, ModelTemplate
+from scaffold.kit.analysis import FileScanner
 
 
 class Scaffold:
@@ -49,6 +50,14 @@ class Scaffold:
             fields.append(new_field)
         with open(models_file_path, 'a') as mf:
             mf.write(ModelTemplate().substitute(name=self.model, field='\n    '.join(field for field in fields)))
+
+    def create_views(self):
+        '''
+        1. get app models
+        2. check if urls.py and model urls exist
+        3. check if view already exists
+        4. #TODO: ........
+         '''
 
     def execute(self):
         if not self.app:

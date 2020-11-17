@@ -1,10 +1,16 @@
 from string import Template
 
+from scaffold.kit.patterns import (MODEL_TEMPLATE,
+                                   FIELD_TEMPLATE,
+                                   CHAR_FIELD_TEMPLATE,
+                                   DECIMAL_FIELD_TEMPLATE,
+                                   LIST_VIEW_TEMPLATE)
+
 from scaffold.utils import default_kwargs
 
 
 class FieldTemplate(Template):
-    template = "$name = models.${type}Field()"
+    template = FIELD_TEMPLATE
 
     def __init__(self):
         super().__init__(self.template)
@@ -19,7 +25,7 @@ class FieldTemplate(Template):
 
 
 class DecimalFieldTemplate(FieldTemplate):
-    template = "$name = models.${type}Field(max_digits=${max}, decimal_places=${places})"
+    template = DECIMAL_FIELD_TEMPLATE
 
     @default_kwargs(max=5, places=2)
     def safe_replace(self, **kwargs):
@@ -27,7 +33,7 @@ class DecimalFieldTemplate(FieldTemplate):
 
 
 class CharFieldTemplate(FieldTemplate):
-    template = "$name = models.${type}Field(max_length=${max})"
+    template = CHAR_FIELD_TEMPLATE
 
     @default_kwargs(max=255)
     def safe_replace(self, **kwargs):
@@ -35,14 +41,7 @@ class CharFieldTemplate(FieldTemplate):
 
 
 class ModelTemplate(Template):
-    template = """
-class ${name}(models.Model):
-    ${field}
-    update_date = models.DateTimeField(auto_now=True)
-    create_date = models.DateTimeField(auto_now_add=True)
-    class Meta:
-        ordering = ['-id']
-"""
+    template = MODEL_TEMPLATE
 
     def __init__(self):
         super().__init__(self.template)
