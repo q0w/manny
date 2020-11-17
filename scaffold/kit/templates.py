@@ -28,6 +28,9 @@ class DecimalFieldTemplate(FieldTemplate):
 
     @default_kwargs(max=5, places=2)
     def safe_replace(self, **kwargs):
+        #TODO: refactor, use logging
+        if kwargs['places'] >= kwargs['max']:
+            raise SystemExit('Error: decimal places should be less than max_digits')
         return super().safe_replace(**kwargs)
 
 
