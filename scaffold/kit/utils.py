@@ -47,9 +47,3 @@ class Walker(ast.NodeTransformer):
         with open(self.file, 'w') as f:
             f.write(astor.to_source(self.visit(self.tree)))
 
-    def get_assignments(self, variable):
-        for node in ast.walk(self.get_tree()):
-            if isinstance(node, ast.Assign) and node.targets[0].id == variable:
-                assignments = [x.value for x in node.value.elts]
-                return assignments
-        return None
