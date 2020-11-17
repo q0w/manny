@@ -31,3 +31,10 @@ class FileScanner:
             if isinstance(node, ast.Import):
                 imports[None] = [x.name for x in node.names]
         return imports
+
+    def get_assignments(self, variable):
+        for node in ast.walk(self.get_tree()):
+            if isinstance(node, ast.Assign) and node.targets[0].id == variable:
+                assignments = [x.value for x in node.value.elts]
+                return assignments
+        return None
