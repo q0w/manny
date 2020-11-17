@@ -2,7 +2,7 @@ import os, sys, json
 import subprocess
 from django.conf import settings
 from scaffold.kit.templates import FieldTemplate, DecimalFieldTemplate, CharFieldTemplate, ModelTemplate
-from scaffold.kit.analysis import FileScanner
+from scaffold.kit.utils import FileScanner
 
 
 class Scaffold:

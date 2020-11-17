@@ -5,8 +5,7 @@ from scaffold.kit.patterns import (MODEL_TEMPLATE,
                                    CHAR_FIELD_TEMPLATE,
                                    DECIMAL_FIELD_TEMPLATE,
                                    LIST_VIEW_TEMPLATE)
-
-from scaffold.utils import default_kwargs
+from scaffold.kit.utils import default_kwargs
 
 
 class FieldTemplate(Template):
@@ -45,3 +44,7 @@ class ModelTemplate(Template):
 
     def __init__(self):
         super().__init__(self.template)
+
+
+class ListViewTemplate(Template):
+    template = LIST_VIEW_TEMPLATE
