@@ -33,7 +33,7 @@ class Scaffold:
             return DecimalFieldTemplate().safe_replace(**dict(zip(options, args)))
         if args[1] == 'Char':
             options = ['name', 'type', 'max']
-            return DecimalFieldTemplate().safe_replace(**dict(zip(options, args)))
+            return CharFieldTemplate().safe_replace(**dict(zip(options, args)))
         options = ['name', 'type']
         return FieldTemplate().safe_replace(**dict(zip(options, args)))
 
