@@ -28,16 +28,18 @@ class Walker(ast.NodeTransformer):
     def visit_Assign(self, node):
         ast.NodeVisitor.generic_visit(self, node)
         if node.targets[0].id == self.options['variable']:
-            node.value.elts.extend([ast.Constant(value=x, kind=None) for x in self.options['variable_values']])
+            node.value.elts.extend([ast.Constant(value=x, kind=None) for x in self.options['variable_values'] if x not in [app.value for app in node.value.elts]])
         return node
 
     def visit_Import(self, node):
         ast.NodeVisitor.generic_visit(self, node)
         self.__imports['free'] = [x.name for x in node.names]
+        return node
 
     def visit_ImportFrom(self, node):
         ast.NodeVisitor.generic_visit(self, node)
         self.__imports[node.module] = [x.name for x in node.names]
+        return node
 
     def get_imports(self):
         self.visit(self.tree)

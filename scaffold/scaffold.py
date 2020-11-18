@@ -1,5 +1,6 @@
 import os
 import sys
+import glob
 import json
 import subprocess
 from django.conf import settings
@@ -21,14 +22,24 @@ class Scaffold:
     def create_app(self):
         if not os.path.exists(self.SCAFFOLD_APP_DIRS):
             raise Exception(f'SCAFFOLD_APP_DIRS "{self.SCAFFOLD_APP_DIRS}" does not exist')
-        for app in self.app:
-            #TODO: можно почекать переменную apps в settings
-            if not os.path.exists(f'{self.SCAFFOLD_APP_DIRS}{app}'):
-                try:
-                    subprocess.Popen(['python', 'manage.py', 'startapp', app])
-                    #TODO: добавить приложение в сеттингс
-                except Exception as e:
-                    print(e)
+
+        core_app = [filename for filename in
+                    glob.iglob(self.SCAFFOLD_APP_DIRS + '**/settings.py', recursive=True)][0]
+        subdirs = [d[1] for d in os.walk(f'{self.SCAFFOLD_APP_DIRS}')][0]
+        not_installed_apps = [x for x in self.app if x not in subdirs]
+
+        for app in not_installed_apps:
+            try:
+                subprocess.Popen(['python', 'manage.py', 'startapp', app]).wait()
+            except Exception as e:
+                print(e)
+        if not_installed_apps:
+            self.update_installed_apps(core_app)
+
+    def update_installed_apps(self, core_app):
+        walker = Walker(core_app, options={'variable': 'INSTALLED_APPS',
+                                           'variable_values': self.app})
+        walker.mutate()
 
     # TODO:add file deserialize support (json.load) ???
     def get_field(self, field):
