@@ -1,53 +1,32 @@
-from string import Template
-
+from enum import Enum
+from django.template import Template, Context
 from scaffold.kit.patterns import (MODEL_TEMPLATE,
                                    FIELD_TEMPLATE,
                                    CHAR_FIELD_TEMPLATE,
                                    DECIMAL_FIELD_TEMPLATE,
-                                   LIST_VIEW_TEMPLATE)
-from scaffold.kit.utils import default_kwargs
+                                   FOREIGN_KEY_TEMPLATE, MANY_TO_MANY_FIELD_TEMPLATE, ONE_TO_ONE_FIELD_TEMPLATE)
 
 
-class FieldTemplate(Template):
-    template = FIELD_TEMPLATE
+class Field(Enum):
+    Genl = FIELD_TEMPLATE
+    Char = CHAR_FIELD_TEMPLATE
+    Foreign = FOREIGN_KEY_TEMPLATE
+    ManyToMany = MANY_TO_MANY_FIELD_TEMPLATE
+    OneToOne = ONE_TO_ONE_FIELD_TEMPLATE
+    Decimal = DECIMAL_FIELD_TEMPLATE
 
-    def __init__(self):
-        super().__init__(self.template)
 
-    def safe_replace(self, **kwargs):
+class FieldTemplate:
+    @staticmethod
+    def convert(context):
         try:
-            return self.substitute(**kwargs)
+            pattern = Field[context.get('type')].value
         except KeyError:
-            raise SystemExit('Provide field name...')
-        except Exception as e:
-            print(e)
+            pattern = Field.Genl.value
+        return Template(pattern).render(context=Context(context))
 
 
-class DecimalFieldTemplate(FieldTemplate):
-    template = DECIMAL_FIELD_TEMPLATE
-
-    @default_kwargs(max=5, places=2)
-    def safe_replace(self, **kwargs):
-        #TODO: refactor, use logging
-        if kwargs['places'] >= kwargs['max']:
-            raise SystemExit('Error: decimal places should be less than max_digits')
-        return super().safe_replace(**kwargs)
-
-
-class CharFieldTemplate(FieldTemplate):
-    template = CHAR_FIELD_TEMPLATE
-
-    @default_kwargs(max=255)
-    def safe_replace(self, **kwargs):
-        return super().safe_replace(**kwargs)
-
-
-class ModelTemplate(Template):
-    template = MODEL_TEMPLATE
-
-    def __init__(self):
-        super().__init__(self.template)
-
-
-class ListViewTemplate(Template):
-    template = LIST_VIEW_TEMPLATE
+class ModelTemplate:
+    @staticmethod
+    def convert(context):
+        return Template(MODEL_TEMPLATE).render(context=Context(context))

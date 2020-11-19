@@ -4,7 +4,7 @@ import glob
 import json
 import subprocess
 from django.conf import settings
-from scaffold.kit.templates import FieldTemplate, DecimalFieldTemplate, CharFieldTemplate, ModelTemplate
+from scaffold.kit.templates import FieldTemplate, ModelTemplate
 from scaffold.kit.utils import Walker
 
 
@@ -44,11 +44,7 @@ class Scaffold:
     # TODO:add file deserialize support (json.load) ???
     def get_field(self, field):
         field = json.loads(field)
-        if field.get('type') == 'Decimal':
-            return DecimalFieldTemplate().safe_replace(**field)
-        if field.get('type') == 'Char':
-            return CharFieldTemplate().safe_replace(**field)
-        return FieldTemplate().safe_replace(**field)
+        return FieldTemplate.convert(context=field)
 
     def create_model(self):
         models_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.app[0]}/models.py'
@@ -60,7 +56,7 @@ class Scaffold:
             new_field = self.get_field(field)
             fields.append(new_field)
         with open(models_file_path, 'a') as mf:
-            mf.write(ModelTemplate().substitute(name=self.model, field='\n    '.join(field for field in fields)))
+            mf.write(ModelTemplate.convert(context={'name': self.model, 'fields': fields}))
 
     def create_views(self):
         '''
