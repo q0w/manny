@@ -52,13 +52,9 @@ class Scaffold:
 
     def create_model(self):
         models_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.app[0]}/models.py'
-        with open(models_file_path, 'r') as mf:
-            # check if model already exists - using ast
-            for line in mf.readlines():
-                if f'class {self.model}' in line:
-                    # TODO: add logging
-                    sys.exit(f'Model {self.model} already exists')
-
+        existing_models = Walker(file=models_file_path).get_models()
+        if self.model in existing_models:
+            sys.exit(f'model {self.model} already exists...')
         fields = []
         for field in self.fields:
             new_field = self.get_field(field)
