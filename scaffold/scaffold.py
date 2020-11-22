@@ -4,15 +4,16 @@ import glob
 import json
 import subprocess
 from django.conf import settings
-from scaffold.kit.templates import FieldTemplate, ModelTemplate
+from scaffold.kit.templates import FieldTemplate, ModelTemplate, SerializerTemplate
 from scaffold.kit.utils import Walker
 
 
 class Scaffold:
-    def __init__(self, app, model, fields):
-        self.app = app
+    def __init__(self, apps, model, fields, serializers):
+        self.apps = apps
         self.model = model
         self.fields = fields
+        self.serializers = serializers
 
         try:
             self.SCAFFOLD_APP_DIRS = f'{settings.BASE_DIR}/'
@@ -26,7 +27,7 @@ class Scaffold:
         core_app = [filename for filename in
                     glob.iglob(self.SCAFFOLD_APP_DIRS + '**/settings.py', recursive=True)][0]
         subdirs = [d[1] for d in os.walk(f'{self.SCAFFOLD_APP_DIRS}')][0]
-        not_installed_apps = [x for x in self.app if x not in subdirs]
+        not_installed_apps = [x for x in self.apps if x not in subdirs]
 
         for app in not_installed_apps:
             try:
@@ -38,7 +39,7 @@ class Scaffold:
 
     def update_installed_apps(self, core_app):
         walker = Walker(core_app, options={'variable': 'INSTALLED_APPS',
-                                           'variable_values': self.app})
+                                           'variable_values': self.apps})
         walker.mutate()
 
     # TODO:add file deserialize support (json.load) ???
@@ -47,7 +48,7 @@ class Scaffold:
         return FieldTemplate.convert(context=field)
 
     def create_model(self):
-        models_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.app[0]}/models.py'
+        models_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/models.py'
         existing_models = Walker(file=models_file_path).get_models()
         if self.model in existing_models:
             sys.exit(f'model {self.model} already exists...')
@@ -58,6 +59,25 @@ class Scaffold:
         with open(models_file_path, 'a') as mf:
             mf.write(ModelTemplate.convert(context={'name': self.model, 'fields': fields}))
 
+    def check_imports(self, filename, imports):
+        existing_imports = Walker(file=filename).get_imports()
+        missing_imports = {}
+        for key, value in imports.items():
+            missing_values = [x for x in value if x not in set(existing_imports.get(key, []))]
+            if missing_values:
+                missing_imports[key] = missing_values
+        return missing_imports
+
+    def create_serializers(self):
+        serializer_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/serializers.py'
+        missing_imports = self.check_imports(serializer_file_path, {'rest_framework.serializers': ['ModelSerializer']})
+        print(missing_imports)
+        with open(serializer_file_path, 'a') as sf:
+            sf.write(SerializerTemplate.convert(context={'models': self.serializers, 'imports': missing_imports}))
+
+    def create_urls(self):
+        pass
+
     def create_views(self):
         '''
         1. get app models
@@ -67,8 +87,10 @@ class Scaffold:
          '''
 
     def execute(self):
-        if not self.app:
+        if not self.apps:
             sys.exit("No application found. Provide app name...")
         self.create_app()
         if self.model:
             self.create_model()
+        if self.serializers:
+            self.create_serializers()

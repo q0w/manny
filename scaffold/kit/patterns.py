@@ -21,3 +21,14 @@ class {{ name }}(models.Model):{% for field in fields %}
     class Meta:
         ordering = ['-id']
 """
+
+SERIALIZER_TEMPLATE = """
+{% for key, value  in imports.items %}from {{ key }} import {{ value|join:", " }} 
+{% endfor %}
+{% for model in models %}
+class {{ model }}Serializer(ModelSerializer):
+    class Meta:
+        model = {{ model }}
+        fields = '__all__'
+{% endfor %}
+"""
