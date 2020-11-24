@@ -5,7 +5,7 @@ from scaffold.kit.patterns import (MODEL_TEMPLATE,
                                    CHAR_FIELD_TEMPLATE,
                                    DECIMAL_FIELD_TEMPLATE,
                                    FOREIGN_KEY_TEMPLATE, MANY_TO_MANY_FIELD_TEMPLATE, ONE_TO_ONE_FIELD_TEMPLATE,
-                                   SERIALIZER_TEMPLATE)
+                                   SERIALIZER_TEMPLATE, VIEW_SET_URL_TEMPLATE)
 
 
 class Field(Enum):
@@ -37,3 +37,9 @@ class SerializerTemplate:
     @staticmethod
     def convert(context):
         return Template(SERIALIZER_TEMPLATE).render(context=Context(context))
+
+
+class UrlTemplate:
+    @staticmethod
+    def convert(context):
+        return Template(VIEW_SET_URL_TEMPLATE).render(context=Context(context))

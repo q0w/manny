@@ -33,3 +33,13 @@ class {{ model }}Serializer(serializers.ModelSerializer):
         
 {% endfor %}
 """
+
+VIEW_SET_URL_TEMPLATE = """from rest_framework.routers import SimpleRouter
+from {{ app }} import views
+
+
+router = SimpleRouter()
+{% for model in models %}
+router.register(r'{{ model | lower }}', views.{{ model }}ViewSet, '{{model}}'){% endfor %}
+urlpatterns = router.urls
+"""

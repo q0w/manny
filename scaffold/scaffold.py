@@ -4,16 +4,17 @@ import glob
 import json
 import subprocess
 from django.conf import settings
-from scaffold.kit.templates import FieldTemplate, ModelTemplate, SerializerTemplate
+from scaffold.kit.templates import FieldTemplate, ModelTemplate, SerializerTemplate, UrlTemplate
 from scaffold.kit.utils import Walker
 
 
 class Scaffold:
-    def __init__(self, apps, model, fields, serializers):
+    def __init__(self, apps, model, fields, serializers, urls):
         self.apps = apps
         self.model = model
         self.fields = fields
         self.serializers = serializers
+        self.urls = urls
 
         try:
             self.SCAFFOLD_APP_DIRS = f'{settings.BASE_DIR}/'
@@ -47,10 +48,14 @@ class Scaffold:
         field = json.loads(field)
         return FieldTemplate.convert(context=field)
 
-    def check_models(self, models, file=None):
+    def get_existing_models(self, file=None):
         if file is None:
             file = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/models.py'
         existing_models = Walker(file=file).get_models()
+        return existing_models
+
+    def check_models(self, models, file=None):
+        existing_models = self.get_existing_models(file=file)
         missing_models = [x for x in models if x not in set(existing_models)]
         return missing_models
 
@@ -88,7 +93,11 @@ class Scaffold:
             sf.write(SerializerTemplate.convert(context={'models': self.serializers, 'imports': missing_imports}))
 
     def create_urls(self):
-        pass
+        url_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/urls.py'
+        existing_models = self.get_existing_models()
+        print(existing_models)
+        with open(url_file_path, 'w+') as uf:
+            uf.write(UrlTemplate.convert(context={'app': self.apps[0], 'models': existing_models}))
 
     def create_views(self):
         '''
@@ -106,3 +115,5 @@ class Scaffold:
             self.create_model()
         if self.serializers:
             self.create_serializers()
+        if self.urls:
+            self.create_urls()
