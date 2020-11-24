@@ -38,8 +38,7 @@ class Walker(ast.NodeTransformer):
         return node
 
     def get_imports(self):
-        if not self.__imports:
-            self.visit(self.tree)
+        self.visit(self.tree)
         return self.__imports
 
     def get_models(self):
