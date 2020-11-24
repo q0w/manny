@@ -21,12 +21,15 @@ class Scaffold:
         except:
             self.SCAFFOLD_APP_DIRS = './'
 
+    def get_core_app(self):
+        return [os.path.dirname(filename) for filename in
+                glob.iglob(self.SCAFFOLD_APP_DIRS + '**/settings.py', recursive=True)][0]
+
     def create_app(self):
         if not os.path.exists(self.SCAFFOLD_APP_DIRS):
             raise Exception(f'SCAFFOLD_APP_DIRS "{self.SCAFFOLD_APP_DIRS}" does not exist')
 
-        core_app = [filename for filename in
-                    glob.iglob(self.SCAFFOLD_APP_DIRS + '**/settings.py', recursive=True)][0]
+        core_app_settings = f'{self.get_core_app()}/settings.py'
         subdirs = [d[1] for d in os.walk(f'{self.SCAFFOLD_APP_DIRS}')][0]
         not_installed_apps = [x for x in self.apps if x not in subdirs]
 
@@ -36,7 +39,7 @@ class Scaffold:
             except Exception as e:
                 print(e)
         if not_installed_apps:
-            self.update_installed_apps(core_app)
+            self.update_installed_apps(core_app_settings)
 
     def update_installed_apps(self, core_app):
         walker = Walker(core_app, options={'variable': 'INSTALLED_APPS',
@@ -95,7 +98,6 @@ class Scaffold:
     def create_urls(self):
         url_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/urls.py'
         existing_models = self.get_existing_models()
-        print(existing_models)
         with open(url_file_path, 'w+') as uf:
             uf.write(UrlTemplate.convert(context={'app': self.apps[0], 'models': existing_models}))
 
