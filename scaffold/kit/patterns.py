@@ -22,8 +22,7 @@ class {{ name }}(models.Model):{% for field in fields %}
         ordering = ['-id']
 """
 
-SERIALIZER_TEMPLATE = """
-{% for key, value  in imports.items %}from {{ key }} import {{ value|join:", " }} 
+SERIALIZER_TEMPLATE = """{% for key, value  in imports.items %}from {{ key }} import {{ value|join:", " }} 
 {% endfor %}
 {% for model in models %}
 class {{ model }}Serializer(serializers.ModelSerializer):
