@@ -26,9 +26,10 @@ SERIALIZER_TEMPLATE = """
 {% for key, value  in imports.items %}from {{ key }} import {{ value|join:", " }} 
 {% endfor %}
 {% for model in models %}
-class {{ model }}Serializer(ModelSerializer):
+class {{ model }}Serializer(serializers.ModelSerializer):
     class Meta:
         model = {{ model }}
         fields = '__all__'
+        
 {% endfor %}
 """
