@@ -47,6 +47,13 @@ class Scaffold:
         field = json.loads(field)
         return FieldTemplate.convert(context=field)
 
+    def check_models(self, models, file=None):
+        if file is None:
+            file = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/models.py'
+        existing_models = Walker(file=file).get_models()
+        missing_models = [x for x in models if x not in set(existing_models)]
+        return missing_models
+
     def create_model(self):
         models_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/models.py'
         # TODO: refactor using check_models
@@ -71,7 +78,7 @@ class Scaffold:
 
     def create_serializers(self):
         serializer_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/serializers.py'
-        missing_imports = self.check_imports(serializer_file_path, {'rest_framework.serializers': ['ModelSerializer'],
+        missing_imports = self.check_imports(serializer_file_path, {'rest_framework': ['serializers'],
                                                                     '.models': self.serializers})
         with open(serializer_file_path, 'a') as sf:
             sf.write(SerializerTemplate.convert(context={'models': self.serializers, 'imports': missing_imports}))
