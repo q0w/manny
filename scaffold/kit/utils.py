@@ -34,7 +34,7 @@ class Walker(ast.NodeTransformer):
     def visit_ClassDef(self, node):
         ast.NodeVisitor.generic_visit(self, node)
         if node.bases and node.bases[0].value.id == 'models' and node.bases[0].attr == 'Model':
-            self.__models.append(node.name)
+            if node.name not in self.__models: self.__models.append(node.name)
         return node
 
     def get_imports(self):
