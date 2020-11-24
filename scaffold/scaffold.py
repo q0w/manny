@@ -49,6 +49,7 @@ class Scaffold:
 
     def create_model(self):
         models_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/models.py'
+        # TODO: refactor using check_models
         existing_models = Walker(file=models_file_path).get_models()
         if self.model in existing_models:
             sys.exit(f'model {self.model} already exists...')
