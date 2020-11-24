@@ -15,6 +15,7 @@ class Command(BaseCommand):
         parser.add_argument('--model', dest='model', default=None, nargs='+')
         parser.add_argument('--serializers', dest='serializers', default=None, nargs='+')
         parser.add_argument('--urls', dest='urls', action='store_true')
+        parser.add_argument('--views', dest='views', default=None, nargs='+')
 
     def handle(self, *args, **options):
         if not options.get('app_name'):
@@ -26,5 +27,7 @@ class Command(BaseCommand):
         fields = options['model'][1:] if options.get('model') else None
         serializers = options.get('serializers', None)
         urls = options.get('urls', False)
-        scaffold = Scaffold(apps=app_name, model=model_name, fields=fields,serializers=serializers, urls=urls)
+        views = options.get('views', None)
+        scaffold = Scaffold(apps=app_name, model=model_name, fields=fields, serializers=serializers, urls=urls,
+                            views=views)
         scaffold.execute()

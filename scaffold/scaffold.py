@@ -4,17 +4,18 @@ import glob
 import json
 import subprocess
 from django.conf import settings
-from scaffold.kit.templates import FieldTemplate, ModelTemplate, SerializerTemplate, UrlTemplate
+from scaffold.kit.templates import FieldTemplate, ModelTemplate, SerializerTemplate, UrlTemplate, ViewTemplate
 from scaffold.kit.utils import Walker
 
 
 class Scaffold:
-    def __init__(self, apps, model, fields, serializers, urls):
+    def __init__(self, apps, model, fields, serializers, urls, views):
         self.apps = apps
         self.model = model
         self.fields = fields
         self.serializers = serializers
         self.urls = urls
+        self.views = views
 
         try:
             self.SCAFFOLD_APP_DIRS = f'{settings.BASE_DIR}/'
@@ -91,7 +92,7 @@ class Scaffold:
             sys.exit(f'{" ".join(missing_models)} do/does not exist...')
 
         missing_imports = self.check_imports(serializer_file_path, {'rest_framework': ['serializers'],
-                                                                    '.models': serializers})
+                                                                    f'{self.apps[0]}': ['models']})
         with open(serializer_file_path, 'a') as sf:
             sf.write(SerializerTemplate.convert(context={'models': serializers, 'imports': missing_imports}))
 
@@ -102,12 +103,18 @@ class Scaffold:
             uf.write(UrlTemplate.convert(context={'app': self.apps[0], 'models': existing_models}))
 
     def create_views(self):
-        '''
-        1. get app models
-        2. check if urls.py and model urls exist
-        3. check if view already exists
-        4. #TODO: ........
-         '''
+        view_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/views.py'
+        existing_models = self.get_existing_models()
+        views = existing_models if self.views[0] == 'all' else self.views
+        missing_models = self.check_models(views, existing_models)
+        if missing_models:
+            sys.exit(f'{" ".join(missing_models)} do/does not exist...')
+
+        missing_imports = self.check_imports(view_file_path, {'django.shortcuts': ['get_object_or_404'],
+                                                              'rest_framework': ['viewsets', 'response'],
+                                                              f'{self.apps[0]}': ['models', 'serializers']})
+        with open(view_file_path, 'a') as wf:
+            wf.write(ViewTemplate.convert(context={'models': views, 'imports': missing_imports}))
 
     def execute(self):
         if not self.apps:
@@ -119,3 +126,5 @@ class Scaffold:
             self.create_serializers()
         if self.urls:
             self.create_urls()
+        if self.views:
+            self.create_views()
