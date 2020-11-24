@@ -57,15 +57,13 @@ class Scaffold:
         existing_models = Walker(file=file).get_models()
         return existing_models
 
-    def check_models(self, models, file=None):
-        existing_models = self.get_existing_models(file=file)
+    def check_models(self, models, existing_models):
         missing_models = [x for x in models if x not in set(existing_models)]
         return missing_models
 
     def create_model(self):
         models_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/models.py'
-        # TODO: refactor using check_models
-        existing_models = Walker(file=models_file_path).get_models()
+        existing_models = self.get_existing_models(file=models_file_path)
         if self.model in existing_models:
             sys.exit(f'model {self.model} already exists...')
         fields = []
@@ -86,14 +84,16 @@ class Scaffold:
 
     def create_serializers(self):
         serializer_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/serializers.py'
-        missing_models = self.check_models(models=self.serializers)
+        existing_models = self.get_existing_models()
+        serializers = existing_models if self.serializers[0] == 'all' else self.serializers
+        missing_models = self.check_models(serializers, existing_models)
         if missing_models:
             sys.exit(f'{" ".join(missing_models)} do/does not exist...')
 
         missing_imports = self.check_imports(serializer_file_path, {'rest_framework': ['serializers'],
-                                                                    '.models': self.serializers})
+                                                                    '.models': serializers})
         with open(serializer_file_path, 'a') as sf:
-            sf.write(SerializerTemplate.convert(context={'models': self.serializers, 'imports': missing_imports}))
+            sf.write(SerializerTemplate.convert(context={'models': serializers, 'imports': missing_imports}))
 
     def create_urls(self):
         url_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/urls.py'
