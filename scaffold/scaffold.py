@@ -78,6 +78,10 @@ class Scaffold:
 
     def create_serializers(self):
         serializer_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/serializers.py'
+        missing_models = self.check_models(models=self.serializers)
+        if missing_models:
+            sys.exit(f'{" ".join(missing_models)} do/does not exist...')
+
         missing_imports = self.check_imports(serializer_file_path, {'rest_framework': ['serializers'],
                                                                     '.models': self.serializers})
         with open(serializer_file_path, 'a') as sf:
