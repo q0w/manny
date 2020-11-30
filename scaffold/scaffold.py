@@ -36,7 +36,7 @@ class Scaffold:
 
         for app in not_installed_apps:
             try:
-                subprocess.Popen(['python', 'manage.py', 'startapp', app]).wait()
+                subprocess.call(['python', 'manage.py', 'startapp', app])
             except Exception as e:
                 print(e)
         if not_installed_apps:
