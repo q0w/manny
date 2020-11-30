@@ -1,6 +1,6 @@
 import ast
 import astor
-
+import black
 
 class Walker(ast.NodeTransformer):
     __imports = {}
@@ -48,5 +48,6 @@ class Walker(ast.NodeTransformer):
 
     def mutate(self):
         with open(self.file, 'w') as f:
-            f.write(astor.to_source(self.visit(self.tree)))
+            content = astor.to_source(self.visit(self.tree))
+            f.write(black.format_file_contents(content, fast=False, mode=black.FileMode()))
 
