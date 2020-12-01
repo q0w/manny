@@ -45,8 +45,7 @@ class Scaffold:
         return excess_sv
 
     def create_model(self):
-        existing_models = self.get_model_names()
-        if self.new_model in existing_models:
+        if self.new_model in self.get_model_names():
             sys.exit(f'model {self.new_model} already exists...')
         fields = []
         for field in self.fields:
