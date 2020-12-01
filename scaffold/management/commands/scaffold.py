@@ -1,8 +1,9 @@
-from django.core.management.base import BaseCommand
+from django.core.management.base import AppCommand
 from scaffold.scaffold import Scaffold
+import os
 
 
-class Command(BaseCommand):
+class Command(AppCommand):
     def get_version(self):
         return f'scaffold 0.1'
 
@@ -11,23 +12,28 @@ class Command(BaseCommand):
         return parser
 
     def add_arguments(self, parser):
-        parser.add_argument('app_name', nargs='*')
-        parser.add_argument('--model', dest='model', default=None, nargs='+')
-        parser.add_argument('--serializers', dest='serializers', default=None, nargs='+')
-        parser.add_argument('--urls', dest='urls', action='store_true')
-        parser.add_argument('--views', dest='views', default=None, nargs='+')
+        super(Command, self).add_arguments(parser)
+        parser.add_argument('--new', dest='new_apps', default=None, nargs='*')
+        parser.add_argument('-m', '--model', dest='model', default=None, nargs='+')
+        parser.add_argument('-s', '--serializers', dest='serializers', default=None, nargs='+')
+        parser.add_argument('-u', '--urls', dest='urls', action='store_true')
+        parser.add_argument('-vi', '--views', dest='views', default=None, nargs='+')
 
-    def handle(self, *args, **options):
-        if not options.get('app_name'):
-            SystemExit('Provide app name...')
-            # print('Provide app name...')
-            # return
-        app_name = options['app_name']
-        model_name = options['model'][0] if options.get('model') else None
+    def handle_app_config(self, app_config, **options):
+        new_apps = options.get('new_apps')
+        settings = options['settings'] if options.get('settings') else os.environ.get('DJANGO_SETTINGS_MODULE')
+        new_model = options['model'][0] if options.get('model') else None
         fields = options['model'][1:] if options.get('model') else None
         serializers = options.get('serializers', None)
+        views = options.get('views')
         urls = options.get('urls', False)
-        views = options.get('views', None)
-        scaffold = Scaffold(apps=app_name, model=model_name, fields=fields, serializers=serializers, urls=urls,
-                            views=views)
+
+        scaffold = Scaffold(proj_settings=settings,
+                            app_config=app_config,
+                            new_apps=new_apps,
+                            new_model=new_model,
+                            fields=fields,
+                            views=views,
+                            serializers=serializers,
+                            urls=urls)
         scaffold.execute()
