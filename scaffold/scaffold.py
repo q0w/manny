@@ -1,7 +1,5 @@
-import os
 import sys
 import subprocess
-from django.conf import settings
 from scaffold.kit.templates import FieldTemplate, ModelTemplate, SerializerTemplate, UrlTemplate, ViewTemplate
 from scaffold.kit.utils import Walker
 
@@ -20,16 +18,6 @@ class Scaffold:
 
     def get_model_names(self):
         return [m.__name__ for m in self.app_config.get_models()]
-
-    def create_app(self):
-        for app in self.new_apps:
-            try:
-                subprocess.call(['python', 'manage.py', 'startapp', app])
-            except Exception as e:
-                print(e)
-        walker = Walker(file=self.proj_settings, options={'variable': 'INSTALLED_APPS',
-                                                          'variable_values': self.new_apps})
-        walker.mutate()
 
     def get_field(self, field):
         args = field.split(':')
@@ -113,9 +101,6 @@ class Scaffold:
         subprocess.call(['black', view_file_path, '-q'])
 
     def execute(self):
-        # if not self.apps:
-        #     sys.exit("No application found. Provide app name...")
-        # self.create_app()
         if self.new_model:
             self.create_model()
         if self.urls:
@@ -124,3 +109,23 @@ class Scaffold:
             self.create_serializers()
         if self.views:
             self.create_views()
+
+
+class ScaffoldApp:
+    def __init__(self, proj_settings, new_apps):
+        self.apps = new_apps
+        self.proj_settings = proj_settings
+
+    def create_app(self):
+        for app in self.apps:
+            try:
+                subprocess.call(['python', 'manage.py', 'startapp', app])
+            except Exception as e:
+                print(e)
+        walker = Walker(file=self.proj_settings,
+                        options={'variable': 'INSTALLED_APPS', 'variable_values': self.apps})
+        walker.mutate()
+
+    def execute(self):
+        if self.apps:
+            self.create_app()
