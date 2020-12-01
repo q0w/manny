@@ -49,7 +49,7 @@ class Scaffold:
 
     def get_field(self, field):
         args = field.split(':')
-        return FieldTemplate.convert(context=args)
+        return FieldTemplate.convert(args)
 
     def get_existing_models(self, file=None):
         if file is None:

@@ -19,14 +19,14 @@ class Field(Enum):
 
 class FieldTemplate:
     @staticmethod
-    def convert(context):
-        type = context[1]
+    def convert(args):
+        type = args[1]
         try:
             pattern, options = Field[type].value[0], Field[type].value[1]
-            context = dict(zip(options, context))
+            context = dict(zip(options, args))
         except KeyError:
             pattern, options = Field.Genl.value[0], Field.Genl.value[1]
-            context = dict(zip(options, context))
+            context = dict(zip(options, args))
         return Template(pattern).render(context=Context(context))
 
 
