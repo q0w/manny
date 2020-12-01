@@ -1,7 +1,5 @@
 import os
 import sys
-import glob
-import json
 import subprocess
 from django.conf import settings
 from scaffold.kit.templates import FieldTemplate, ModelTemplate, SerializerTemplate, UrlTemplate, ViewTemplate
@@ -9,69 +7,55 @@ from scaffold.kit.utils import Walker
 
 
 class Scaffold:
-    def __init__(self, apps, model, fields, serializers, urls, views):
-        self.apps = apps
-        self.model = model
+    def __init__(self, proj_settings, app_config, new_apps, new_model, fields, serializers, urls, views):
+        self.proj_settings = proj_settings
+        self.new_apps = new_apps
+        self.new_model = new_model
+        self.app_config = app_config
+        self.models = self.get_model_names()
         self.fields = fields
         self.serializers = serializers
         self.urls = urls
         self.views = views
 
-        try:
-            self.SCAFFOLD_APP_DIRS = f'{settings.BASE_DIR}/'
-        except:
-            self.SCAFFOLD_APP_DIRS = './'
-
-    def get_core_app(self):
-        return [os.path.dirname(filename) for filename in
-                glob.iglob(self.SCAFFOLD_APP_DIRS + '**/settings.py', recursive=True)][0]
+    def get_model_names(self):
+        return [m.__name__ for m in self.app_config.get_models()]
 
     def create_app(self):
-        if not os.path.exists(self.SCAFFOLD_APP_DIRS):
-            raise Exception(f'SCAFFOLD_APP_DIRS "{self.SCAFFOLD_APP_DIRS}" does not exist')
-
-        core_app_settings = f'{self.get_core_app()}/settings.py'
-        subdirs = [d[1] for d in os.walk(f'{self.SCAFFOLD_APP_DIRS}')][0]
-        not_installed_apps = [x for x in self.apps if x not in subdirs]
-
-        for app in not_installed_apps:
+        for app in self.new_apps:
             try:
                 subprocess.call(['python', 'manage.py', 'startapp', app])
             except Exception as e:
                 print(e)
-        if not_installed_apps:
-            self.update_installed_apps(core_app_settings)
-
-    def update_installed_apps(self, core_app):
-        walker = Walker(core_app, options={'variable': 'INSTALLED_APPS',
-                                           'variable_values': self.apps})
+        walker = Walker(file=self.proj_settings, options={'variable': 'INSTALLED_APPS',
+                                                          'variable_values': self.new_apps})
         walker.mutate()
 
     def get_field(self, field):
         args = field.split(':')
         return FieldTemplate.convert(args)
 
-    def get_existing_models(self, file=None):
-        if file is None:
-            file = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/models.py'
-        existing_models = Walker(file=file).get_models()
-        return existing_models
-
-    def check_models(self, models, existing_models):
-        missing_models = [x for x in models if x not in set(existing_models)]
+    def check_models(self, models):
+        missing_models = [x for x in models if x not in set(self.get_model_names())]
         return missing_models
 
+    def check_sv(self, file, sv):
+        existing_sv = Walker(file).get_sv()
+        excess_sv = [x for x in sv if x in existing_sv]
+        return excess_sv
+
     def create_model(self):
-        models_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/models.py'
-        existing_models = self.get_existing_models(file=models_file_path)
-        if self.model in existing_models:
-            sys.exit(f'model {self.model} already exists...')
+        existing_models = self.get_model_names()
+        if self.new_model in existing_models:
+            sys.exit(f'model {self.new_model} already exists...')
         fields = []
         for field in self.fields:
             new_field = self.get_field(field)
             fields.append(new_field)
-        with open(models_file_path, 'a') as mf:
-            mf.write(ModelTemplate.convert(context={'name': self.model, 'fields': fields}))
+        with open(self.app_config.models_module.__file__, 'a') as mf:
+            content = ModelTemplate.convert(context={'name': self.new_model, 'fields': fields})
+            mf.write(content)
+        subprocess.call(['black', self.app_config.models_module.__file__, '-q'])
 
     def check_imports(self, filename, imports):
         existing_imports = Walker(file=filename).get_imports()
@@ -83,47 +67,61 @@ class Scaffold:
         return missing_imports
 
     def create_serializers(self):
-        serializer_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/serializers.py'
-        existing_models = self.get_existing_models()
-        serializers = existing_models if self.serializers[0] == 'all' else self.serializers
-        missing_models = self.check_models(serializers, existing_models)
+        serializer_file_path = f'{self.app_config.module.__path__[0]}/serializers.py'
+        serializers = self.get_model_names() if self.serializers[0] == 'a' else self.serializers
+
+        missing_models = self.check_models(serializers)
         if missing_models:
             sys.exit(f'{" ".join(missing_models)} do/does not exist...')
+
+        excess_serializers = self.check_sv(serializer_file_path, serializers)
+        if excess_serializers:
+            sys.exit(f'{" ".join(excess_serializers)} do/does exist...')
 
         missing_imports = self.check_imports(serializer_file_path, {'rest_framework': ['serializers'],
-                                                                    f'{self.apps[0]}': ['models']})
+                                                                    f'{self.app_config.name}': ['models']})
         with open(serializer_file_path, 'a') as sf:
-            sf.write(SerializerTemplate.convert(context={'models': serializers, 'imports': missing_imports}))
+            content = SerializerTemplate.convert(context={'models': serializers, 'imports': missing_imports})
+            sf.write(content)
+        subprocess.call(['black', serializer_file_path, '-q'])
 
     def create_urls(self):
-        url_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/urls.py'
-        existing_models = self.get_existing_models()
+        url_file_path = f'{self.app_config.module.__path__[0]}/urls.py'
+        existing_models = self.get_model_names()
         with open(url_file_path, 'w+') as uf:
-            uf.write(UrlTemplate.convert(context={'app': self.apps[0], 'models': existing_models}))
+            content = UrlTemplate.convert(context={'app': self.app_config.name, 'models': existing_models})
+            uf.write(content)
+        subprocess.call(['black', url_file_path, '-q'])
 
     def create_views(self):
-        view_file_path = f'{self.SCAFFOLD_APP_DIRS}{self.apps[0]}/views.py'
-        existing_models = self.get_existing_models()
-        views = existing_models if self.views[0] == 'all' else self.views
-        missing_models = self.check_models(views, existing_models)
+        view_file_path = f'{self.app_config.module.__path__[0]}/views.py'
+        views = self.get_model_names() if self.views[0] == 'a' else self.views
+
+        missing_models = self.check_models(views)
         if missing_models:
             sys.exit(f'{" ".join(missing_models)} do/does not exist...')
+
+        excess_views = self.check_sv(view_file_path, views)
+        if excess_views:
+            sys.exit(f'{" ".join(excess_views)} do/does exist...')
 
         missing_imports = self.check_imports(view_file_path, {'django.shortcuts': ['get_object_or_404'],
                                                               'rest_framework': ['viewsets', 'response'],
-                                                              f'{self.apps[0]}': ['models', 'serializers']})
+                                                              f'{self.app_config.name}': ['models', 'serializers']})
         with open(view_file_path, 'a') as wf:
-            wf.write(ViewTemplate.convert(context={'models': views, 'imports': missing_imports}))
+            content = ViewTemplate.convert(context={'models': views, 'imports': missing_imports})
+            wf.write(content)
+        subprocess.call(['black', view_file_path, '-q'])
 
     def execute(self):
-        if not self.apps:
-            sys.exit("No application found. Provide app name...")
-        self.create_app()
-        if self.model:
+        # if not self.apps:
+        #     sys.exit("No application found. Provide app name...")
+        # self.create_app()
+        if self.new_model:
             self.create_model()
-        if self.serializers:
-            self.create_serializers()
         if self.urls:
             self.create_urls()
+        if self.serializers:
+            self.create_serializers()
         if self.views:
             self.create_views()
