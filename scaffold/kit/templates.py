@@ -9,21 +9,24 @@ from scaffold.kit.patterns import (MODEL_TEMPLATE,
 
 
 class Field(Enum):
-    Genl = FIELD_TEMPLATE
-    Char = CHAR_FIELD_TEMPLATE
-    Foreign = FOREIGN_KEY_TEMPLATE
-    ManyToMany = MANY_TO_MANY_FIELD_TEMPLATE
-    OneToOne = ONE_TO_ONE_FIELD_TEMPLATE
-    Decimal = DECIMAL_FIELD_TEMPLATE
+    Genl = (FIELD_TEMPLATE, ['name', 'type'])
+    Char = (CHAR_FIELD_TEMPLATE, ['name', 'type', 'max'])
+    Foreign = (FOREIGN_KEY_TEMPLATE, ['name', 'type', 'model', 'delete'])
+    ManyToMany = (MANY_TO_MANY_FIELD_TEMPLATE, ['name', 'type', 'model', 'delete'])
+    OneToOne = (ONE_TO_ONE_FIELD_TEMPLATE, ['name', 'type', 'model', 'delete'])
+    Decimal = (DECIMAL_FIELD_TEMPLATE, ['name', 'type', 'max', 'places'])
 
 
 class FieldTemplate:
     @staticmethod
     def convert(context):
+        type = context[1]
         try:
-            pattern = Field[context.get('type')].value
+            pattern, options = Field[type].value[0], Field[type].value[1]
+            context = dict(zip(options, context))
         except KeyError:
-            pattern = Field.Genl.value
+            pattern, options = Field.Genl.value[0], Field.Genl.value[1]
+            context = dict(zip(options, context))
         return Template(pattern).render(context=Context(context))
 
 

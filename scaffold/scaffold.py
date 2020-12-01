@@ -47,10 +47,9 @@ class Scaffold:
                                            'variable_values': self.apps})
         walker.mutate()
 
-    # TODO:add file deserialize support (json.load) ???
     def get_field(self, field):
-        field = json.loads(field)
-        return FieldTemplate.convert(context=field)
+        args = field.split(':')
+        return FieldTemplate.convert(context=args)
 
     def get_existing_models(self, file=None):
         if file is None:
