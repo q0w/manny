@@ -25,6 +25,5 @@ class Command(BaseCommand):
             if options.get("settings")
             else os.environ.get("DJANGO_SETTINGS_MODULE")
         )
-        proj_settings = sys.modules[settings].__file__
-        scaffold = ScaffoldApp(proj_settings, new_apps)
+        scaffold = ScaffoldApp(settings, new_apps)
         scaffold.execute()

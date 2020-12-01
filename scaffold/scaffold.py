@@ -122,7 +122,7 @@ class ScaffoldApp:
                 subprocess.call(['python', 'manage.py', 'startapp', app])
             except Exception as e:
                 print(e)
-        walker = Walker(file=self.proj_settings,
+        walker = Walker(file=sys.modules[self.proj_settings].__file__,
                         options={'variable': 'INSTALLED_APPS', 'variable_values': self.apps})
         walker.mutate()
 
