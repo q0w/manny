@@ -3,15 +3,6 @@ Command line interface for creating templates of models, fields for Django proje
 ## Latest version
 scaffold 0.1
 ## Installation
-Add to INSTALLED_APPS
-```python
-INSTALLED_APPS = [
-    ...
-    'scaffold',
-    ...
-]
-```     
+Add to INSTALLED_APPS 
 ## Usage
-```python
-python manage.py scaffold {app} {options}
-```  
+
