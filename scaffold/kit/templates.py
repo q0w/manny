@@ -1,20 +1,26 @@
 from enum import Enum
 from django.template import Template, Context
-from scaffold.kit.patterns import (MODEL_TEMPLATE,
-                                   FIELD_TEMPLATE,
-                                   CHAR_FIELD_TEMPLATE,
-                                   DECIMAL_FIELD_TEMPLATE,
-                                   FOREIGN_KEY_TEMPLATE, MANY_TO_MANY_FIELD_TEMPLATE, ONE_TO_ONE_FIELD_TEMPLATE,
-                                   SERIALIZER_TEMPLATE, VIEW_SET_URL_TEMPLATE, VIEW_SET_VIEW_TEMPLATE)
+from scaffold.kit.patterns import (
+    MODEL_TEMPLATE,
+    FIELD_TEMPLATE,
+    CHAR_FIELD_TEMPLATE,
+    DECIMAL_FIELD_TEMPLATE,
+    FOREIGN_KEY_TEMPLATE,
+    MANY_TO_MANY_FIELD_TEMPLATE,
+    ONE_TO_ONE_FIELD_TEMPLATE,
+    SERIALIZER_TEMPLATE,
+    VIEW_SET_URL_TEMPLATE,
+    VIEW_SET_VIEW_TEMPLATE,
+)
 
 
 class Field(Enum):
-    Genl = (FIELD_TEMPLATE, ['name', 'type'])
-    Char = (CHAR_FIELD_TEMPLATE, ['name', 'type', 'max'])
-    Foreign = (FOREIGN_KEY_TEMPLATE, ['name', 'type', 'model', 'delete'])
-    ManyToMany = (MANY_TO_MANY_FIELD_TEMPLATE, ['name', 'type', 'model', 'delete'])
-    OneToOne = (ONE_TO_ONE_FIELD_TEMPLATE, ['name', 'type', 'model', 'delete'])
-    Decimal = (DECIMAL_FIELD_TEMPLATE, ['name', 'type', 'max', 'places'])
+    Genl = (FIELD_TEMPLATE, ["name", "type"])
+    Char = (CHAR_FIELD_TEMPLATE, ["name", "type", "max"])
+    Foreign = (FOREIGN_KEY_TEMPLATE, ["name", "type", "model", "delete"])
+    ManyToMany = (MANY_TO_MANY_FIELD_TEMPLATE, ["name", "type", "model", "delete"])
+    OneToOne = (ONE_TO_ONE_FIELD_TEMPLATE, ["name", "type", "model", "delete"])
+    Decimal = (DECIMAL_FIELD_TEMPLATE, ["name", "type", "max", "places"])
 
 
 class FieldTemplate:

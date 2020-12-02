@@ -1,17 +1,27 @@
 FIELD_TEMPLATE = "{{ name }} = models.{{ type|title }}Field()"
 
-DECIMAL_FIELD_TEMPLATE = "{{ name }} = models.{{ type }}Field(max_digits={{ max|default:'5' }}, decimal_places={{ " \
-                         "places|default:'2' }}) "
+DECIMAL_FIELD_TEMPLATE = (
+    "{{ name }} = models.{{ type }}Field(max_digits={{ max|default:'5' }}, decimal_places={{ "
+    "places|default:'2' }}) "
+)
 
-CHAR_FIELD_TEMPLATE = "{{ name }} = models.{{ type }}Field(max_length={{max|default:'255'}})"
+CHAR_FIELD_TEMPLATE = (
+    "{{ name }} = models.{{ type }}Field(max_length={{max|default:'255'}})"
+)
 
-FOREIGN_KEY_TEMPLATE = '{{ name }} = models.{{ type }}Key({{ model|default:"\'self\'" }}, on_delete=models.{{ ' \
-                       'delete|default:"CASCADE" }}) '
+FOREIGN_KEY_TEMPLATE = (
+    "{{ name }} = models.{{ type }}Key({{ model|default:\"'self'\" }}, on_delete=models.{{ "
+    'delete|default:"CASCADE" }}) '
+)
 
-ONE_TO_ONE_FIELD_TEMPLATE = '{{ name }} = models.{{ type }}Field({{ model|default:"\'self\'" }}, on_delete=models.{{ ' \
-                            'delete|default:"CASCADE" }}) '
+ONE_TO_ONE_FIELD_TEMPLATE = (
+    "{{ name }} = models.{{ type }}Field({{ model|default:\"'self'\" }}, on_delete=models.{{ "
+    'delete|default:"CASCADE" }}) '
+)
 
-MANY_TO_MANY_FIELD_TEMPLATE = '{{ name }} = models.{{ type }}Field({{ model|default:"\'self\'" }})'
+MANY_TO_MANY_FIELD_TEMPLATE = (
+    "{{ name }} = models.{{ type }}Field({{ model|default:\"'self'\" }})"
+)
 
 MODEL_TEMPLATE = """
 class {{ name }}(models.Model):{% for field in fields %}
