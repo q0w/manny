@@ -1,15 +1,12 @@
-import sys
 import subprocess
+import sys
 
 from django.core.management import CommandError
 
-from scaffold.kit.templates import (
-    FieldTemplate,
-    ModelTemplate,
-    SerializerTemplate,
-    UrlTemplate,
-    ViewTemplate,
-)
+from scaffold.kit.colors import TermColor
+from scaffold.kit.templates import (FieldTemplate, ModelTemplate,
+                                    SerializerTemplate, UrlTemplate,
+                                    ViewTemplate)
 from scaffold.kit.utils import Walker
 
 
@@ -18,7 +15,6 @@ class Scaffold:
         self,
         proj_settings,
         app_config,
-        new_apps,
         new_model,
         fields,
         serializers,
@@ -26,7 +22,6 @@ class Scaffold:
         views,
     ):
         self.proj_settings = proj_settings
-        self.new_apps = new_apps
         self.new_model = new_model
         self.app_config = app_config
         self.models = self.get_model_names()
@@ -64,6 +59,7 @@ class Scaffold:
             )
             mf.write(content)
         subprocess.call(["black", self.app_config.models_module.__file__, "-q"])
+        print(f"{TermColor.OK}model: {self.new_model} has been created{TermColor.ENDC}")
 
     def check_imports(self, filename, imports):
         existing_imports = Walker(file=filename).get_imports()
@@ -100,6 +96,11 @@ class Scaffold:
             )
             sf.write(content)
         subprocess.call(["black", serializer_file_path, "-q"])
+        print(
+            f"{TermColor.OK}serializers: {' '.join(serializers)} have been created{TermColor.ENDC}"
+        ) if len(serializers) > 1 else print(
+            f"{TermColor.OK}serializer: {' '.join(serializers)} has been created{TermColor.ENDC}"
+        )
 
     def create_urls(self):
         url_file_path = f"{self.app_config.module.__path__[0]}/urls.py"
@@ -110,6 +111,9 @@ class Scaffold:
             )
             uf.write(content)
         subprocess.call(["black", url_file_path, "-q"])
+        print(
+            f"{TermColor.OK}urls: SimpleRouter for all models has been created{TermColor.ENDC}"
+        )
 
     def create_views(self):
         view_file_path = f"{self.app_config.module.__path__[0]}/views.py"
@@ -137,6 +141,11 @@ class Scaffold:
             )
             wf.write(content)
         subprocess.call(["black", view_file_path, "-q"])
+        print(
+            f"{TermColor.OK}view: {' '.join(views)} have been created{TermColor.ENDC}"
+        ) if len(views) > 1 else print(
+            f"{TermColor.OK}view: {' '.join(views)} has been created{TermColor.ENDC}"
+        )
 
     def execute(self):
         if self.new_model:

@@ -1,6 +1,7 @@
 import os
-import sys
+
 from django.core.management.base import BaseCommand
+
 from scaffold.scaffold import ScaffoldApp
 
 
@@ -14,7 +15,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
-        parser.add_argument("new_apps", nargs="*")
+        parser.add_argument("new_apps", nargs="*", help="Add new apps")
 
     def handle(self, *args, **options):
         if not options.get("new_apps"):

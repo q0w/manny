@@ -1,6 +1,8 @@
-from django.core.management.base import AppCommand
-from scaffold.scaffold import Scaffold
 import os
+
+from django.core.management.base import AppCommand
+
+from scaffold.scaffold import Scaffold
 
 
 class Command(AppCommand):
@@ -13,16 +15,39 @@ class Command(AppCommand):
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
-        parser.add_argument("--new", dest="new_apps", default=None, nargs="*")
-        parser.add_argument("-m", "--model", dest="model", default=None, nargs="+")
         parser.add_argument(
-            "-s", "--serializers", dest="serializers", default=None, nargs="+"
+            "-m",
+            "--model",
+            dest="model",
+            default=None,
+            nargs="+",
+            help="Add a new model with specific fields",
         )
-        parser.add_argument("-u", "--urls", dest="urls", action="store_true")
-        parser.add_argument("-vi", "--views", dest="views", default=None, nargs="+")
+        parser.add_argument(
+            "-s",
+            "--serializers",
+            dest="serializers",
+            default=None,
+            nargs="+",
+            help="Add a new serializer for the specific model or use keyword 'a' for all models",
+        )
+        parser.add_argument(
+            "-u",
+            "--urls",
+            dest="urls",
+            action="store_true",
+            help="Add urls for all models",
+        )
+        parser.add_argument(
+            "-vi",
+            "--views",
+            dest="views",
+            default=None,
+            nargs="+",
+            help="Add a view for the specific model or use keyword 'a' for all models",
+        )
 
     def handle_app_config(self, app_config, **options):
-        new_apps = options.get("new_apps")
         settings = (
             options["settings"]
             if options.get("settings")
@@ -37,7 +62,6 @@ class Command(AppCommand):
         scaffold = Scaffold(
             proj_settings=settings,
             app_config=app_config,
-            new_apps=new_apps,
             new_model=new_model,
             fields=fields,
             views=views,
