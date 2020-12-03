@@ -4,22 +4,26 @@ import sys
 from django.core.management import CommandError
 
 from scaffold.kit.colors import TermColor
-from scaffold.kit.templates import (FieldTemplate, ModelTemplate,
-                                    SerializerTemplate, UrlTemplate,
-                                    ViewTemplate)
+from scaffold.kit.templates import (
+    FieldTemplate,
+    ModelTemplate,
+    SerializerTemplate,
+    UrlTemplate,
+    ViewTemplate,
+)
 from scaffold.kit.utils import Walker
 
 
 class Scaffold:
     def __init__(
-        self,
-        proj_settings,
-        app_config,
-        new_model,
-        fields,
-        serializers,
-        urls,
-        views,
+            self,
+            proj_settings,
+            app_config,
+            new_model,
+            fields,
+            serializers,
+            urls,
+            views,
     ):
         self.proj_settings = proj_settings
         self.new_model = new_model
@@ -80,11 +84,21 @@ class Scaffold:
 
         missing_models = self.check_models(serializers)
         if missing_models:
-            raise CommandError(f'{" ".join(missing_models)} do/does not exist...')
+            error = (
+                f'{" ".join(missing_models)} do not exist...'
+                if len(missing_models) > 1
+                else f'{" ".join(missing_models)} does not exist...'
+            )
+            raise CommandError(error)
 
         excess_serializers = self.check_sv(serializer_file_path, serializers)
         if excess_serializers:
-            raise CommandError(f'{" ".join(excess_serializers)} do/does exist...')
+            error = (
+                f'{" ".join(excess_serializers)} already exist...'
+                if len(excess_serializers) > 1
+                else f'{" ".join(excess_serializers)} already exists...'
+            )
+            raise CommandError(error)
 
         missing_imports = self.check_imports(
             serializer_file_path,
