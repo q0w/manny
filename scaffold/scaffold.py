@@ -16,14 +16,14 @@ from scaffold.kit.utils import Walker
 
 class Scaffold:
     def __init__(
-            self,
-            proj_settings,
-            app_config,
-            new_model,
-            fields,
-            serializers,
-            urls,
-            views,
+        self,
+        proj_settings,
+        app_config,
+        new_model,
+        fields,
+        serializers,
+        urls,
+        views,
     ):
         self.proj_settings = proj_settings
         self.new_model = new_model
@@ -79,7 +79,7 @@ class Scaffold:
     def create_serializers(self):
         serializer_file_path = f"{self.app_config.module.__path__[0]}/serializers.py"
         serializers = (
-            self.get_model_names() if self.serializers[0] == "a" else self.serializers
+            self.get_model_names() if not self.serializers else self.serializers
         )
 
         missing_models = self.check_models(serializers)
@@ -131,7 +131,7 @@ class Scaffold:
 
     def create_views(self):
         view_file_path = f"{self.app_config.module.__path__[0]}/views.py"
-        views = self.get_model_names() if self.views[0] == "a" else self.views
+        views = self.get_model_names() if not self.views else self.views
 
         missing_models = self.check_models(views)
         if missing_models:
@@ -166,9 +166,9 @@ class Scaffold:
             self.create_model()
         if self.urls:
             self.create_urls()
-        if self.serializers:
+        if self.serializers is not None:
             self.create_serializers()
-        if self.views:
+        if self.views is not None:
             self.create_views()
 
 

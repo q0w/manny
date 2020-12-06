@@ -28,7 +28,7 @@ class Command(AppCommand):
             "--serializers",
             dest="serializers",
             default=None,
-            nargs="+",
+            nargs="*",
             help="Add a new serializer for the specific model or use keyword 'a' for all models",
         )
         parser.add_argument(
@@ -43,7 +43,7 @@ class Command(AppCommand):
             "--views",
             dest="views",
             default=None,
-            nargs="+",
+            nargs="*",
             help="Add a view for the specific model or use keyword 'a' for all models",
         )
 

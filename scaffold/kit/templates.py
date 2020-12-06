@@ -2,12 +2,18 @@ from enum import Enum
 
 from django.template import Context, Template
 
-from scaffold.kit.patterns import (CHAR_FIELD_TEMPLATE, DECIMAL_FIELD_TEMPLATE,
-                                   FIELD_TEMPLATE, FOREIGN_KEY_TEMPLATE,
-                                   MANY_TO_MANY_FIELD_TEMPLATE, MODEL_TEMPLATE,
-                                   ONE_TO_ONE_FIELD_TEMPLATE,
-                                   SERIALIZER_TEMPLATE, VIEW_SET_URL_TEMPLATE,
-                                   VIEW_SET_VIEW_TEMPLATE)
+from scaffold.kit.patterns import (
+    CHAR_FIELD_TEMPLATE,
+    DECIMAL_FIELD_TEMPLATE,
+    FIELD_TEMPLATE,
+    FOREIGN_KEY_TEMPLATE,
+    MANY_TO_MANY_FIELD_TEMPLATE,
+    MODEL_TEMPLATE,
+    ONE_TO_ONE_FIELD_TEMPLATE,
+    SERIALIZER_TEMPLATE,
+    VIEW_SET_URL_TEMPLATE,
+    VIEW_SET_VIEW_TEMPLATE,
+)
 
 
 class Field(Enum):
