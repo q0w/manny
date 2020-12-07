@@ -26,10 +26,10 @@ $ python manage.py scaffold {app_name} {options}
 | ------ | ------ |
 | -m, --model {fields} | Add a model with specific fields. Default fields: update_date, create_date|
 | -s, --serializers {model_names} | Add a new serializer for the specific model; by default for all models |
-| -vi, -views | Add a view for the specific model; by default for all models  |
+| -vi, -views {model_names} | Add a view for the specific model; by default for all models  |
 | -u | Add urls for all models |
 
-To create models, use following syntax:
+To create models, use the following syntax:
 ```python
 $ python manage.py scaffold {app_name} -m {model_name} title:Char:255 books:Foreign::CASCADE
 ```
