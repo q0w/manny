@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 setup(
     name="manny",
-    version="0.1.0",
+    version="0.1.2",
     author="q0w",
     license="MIT",
     description="Django scaffold like in Ruby on Rails",
