@@ -10,7 +10,7 @@ class Walker(ast.NodeTransformer):
 
     def __init__(self, file, options=None):
         self.file = file
-        with open(self.file, "r") as f:
+        with open(self.file, "w+") as f:
             self.tree = ast.parse(f.read())
         self.options = options
         super().__init__()
@@ -24,7 +24,6 @@ class Walker(ast.NodeTransformer):
     def visit_Assign(self, node):
         ast.NodeVisitor.generic_visit(self, node)
         if self.options:
-            # TODO: refactor
             if node.targets[0].id == self.options["variable"]:
                 node.value.elts.extend(
                     [
