@@ -204,6 +204,11 @@ class ScaffoldApp:
             options={"variable": "INSTALLED_APPS", "variable_values": self.apps},
         )
         walker.mutate()
+        print(
+            f"{TermColor.OK}apps: {' '.join(self.apps)} have been created{TermColor.ENDC}"
+        ) if len(self.apps) > 1 else print(
+            f"{TermColor.OK}app: {' '.join(self.apps)} has been created{TermColor.ENDC}"
+        )
 
     def execute(self):
         if self.apps:
