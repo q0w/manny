@@ -98,12 +98,15 @@ class Scaffold:
 
         excess_serializers = self.check_sv(serializer_file_path, serializers)
         if excess_serializers:
+            serializers = [m for m in serializers if m not in excess_serializers]
+            if not serializers:
+                raise CommandError("all serializers already exist...")
             error = (
-                f'{" ".join(excess_serializers)} already exist...'
+                f'{TermColor.ERROR}{" ".join(excess_serializers)} already exist...{TermColor.ENDC}'
                 if len(excess_serializers) > 1
-                else f'{" ".join(excess_serializers)} already exists...'
+                else f'{" ".join(excess_serializers)} already exists...{TermColor.ENDC}'
             )
-            raise CommandError(error)
+            print(error)
 
         missing_imports = self.check_imports(
             serializer_file_path,
@@ -144,12 +147,15 @@ class Scaffold:
 
         excess_views = self.check_sv(view_file_path, views)
         if excess_views:
+            views = [m for m in views if m not in excess_views]
+            if not views:
+                raise CommandError("all views already exist...")
             error = (
-                f'{" ".join(excess_views)} already exist...'
+                f'{TermColor.ERROR}{" ".join(excess_views)} already exist...{TermColor.ENDC}'
                 if len(excess_views) > 1
-                else f'{" ".join(excess_views)} already exists...'
+                else f'{TermColor.ERROR}{" ".join(excess_views)} already exists...{TermColor.ENDC}'
             )
-            raise CommandError(error)
+            print(error)
 
         missing_imports = self.check_imports(
             view_file_path,
