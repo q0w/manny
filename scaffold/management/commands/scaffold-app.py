@@ -7,7 +7,7 @@ from scaffold.scaffold import ScaffoldApp
 
 class Command(BaseCommand):
     def get_version(self):
-        return f"scaffold 0.1.3"
+        return f"scaffold 0.1.4"
 
     def create_parser(self, prog_name, subcommand, **kwargs):
         parser = super(Command, self).create_parser(prog_name, subcommand)
