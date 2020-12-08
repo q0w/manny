@@ -6,6 +6,8 @@ from scaffold.scaffold import Scaffold
 
 
 class Command(AppCommand):
+    help = "Generate models, serializers, views, urls for a Django app"
+
     def get_version(self):
         return f"scaffold 0.1.4"
 
@@ -29,7 +31,7 @@ class Command(AppCommand):
             dest="serializers",
             default=None,
             nargs="*",
-            help="Add a new serializer for the specific model or use keyword 'a' for all models",
+            help="Add a new serializer for the specific model; by default for all models",
         )
         parser.add_argument(
             "-u",
@@ -44,7 +46,7 @@ class Command(AppCommand):
             dest="views",
             default=None,
             nargs="*",
-            help="Add a view for the specific model or use keyword 'a' for all models",
+            help="Add a view for the specific model; by default for all models",
         )
 
     def handle_app_config(self, app_config, **options):
