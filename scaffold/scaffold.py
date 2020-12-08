@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 
@@ -46,6 +47,8 @@ class Scaffold:
         return missing_models
 
     def check_sv(self, file, sv):
+        if not os.path.isfile(file):
+            return None
         existing_sv = Walker(file).get_sv()
         excess_sv = [x for x in sv if x in existing_sv]
         return excess_sv
@@ -66,6 +69,8 @@ class Scaffold:
         print(f"{TermColor.OK}model: {self.new_model} has been created{TermColor.ENDC}")
 
     def check_imports(self, filename, imports):
+        if not os.path.isfile(filename):
+            return imports
         existing_imports = Walker(file=filename).get_imports()
         missing_imports = {}
         for key, value in imports.items():

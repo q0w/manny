@@ -10,7 +10,7 @@ class Walker(ast.NodeTransformer):
 
     def __init__(self, file, options=None):
         self.file = file
-        with open(self.file, "w+") as f:
+        with open(self.file, "r") as f:
             self.tree = ast.parse(f.read())
         self.options = options
         super().__init__()
