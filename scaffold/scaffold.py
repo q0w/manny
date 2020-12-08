@@ -144,7 +144,12 @@ class Scaffold:
 
         excess_views = self.check_sv(view_file_path, views)
         if excess_views:
-            raise CommandError(f'{" ".join(excess_views)} do/does exist...')
+            error = (
+                f'{" ".join(excess_views)} already exist...'
+                if len(excess_views) > 1
+                else f'{" ".join(excess_views)} already exists...'
+            )
+            raise CommandError(error)
 
         missing_imports = self.check_imports(
             view_file_path,
@@ -161,7 +166,7 @@ class Scaffold:
             wf.write(content)
         subprocess.call(["black", view_file_path, "-q"])
         print(
-            f"{TermColor.OK}view: {' '.join(views)} have been created{TermColor.ENDC}"
+            f"{TermColor.OK}views: {' '.join(views)} have been created{TermColor.ENDC}"
         ) if len(views) > 1 else print(
             f"{TermColor.OK}view: {' '.join(views)} has been created{TermColor.ENDC}"
         )
