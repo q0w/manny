@@ -11,6 +11,7 @@ from scaffold.kit.templates import (
     SerializerTemplate,
     UrlTemplate,
     ViewTemplate,
+    CommonTemplate,
 )
 from scaffold.kit.utils import Walker
 
@@ -38,9 +39,8 @@ class Scaffold:
     def get_model_names(self):
         return [m.__name__ for m in self.app_config.get_models()]
 
-    def get_field(self, field):
-        args = field.split(":")
-        return FieldTemplate.convert(args)
+    def get_content(self, context, template: CommonTemplate):
+        return template.convert(context)
 
     def check_models(self, models):
         missing_models = [x for x in models if x not in set(self.get_model_names())]
@@ -58,11 +58,11 @@ class Scaffold:
             raise CommandError(f"model {self.new_model} already exists...")
         fields = []
         for field in self.fields:
-            new_field = self.get_field(field)
+            new_field = self.get_content(field.split(":"), FieldTemplate())
             fields.append(new_field)
         with open(self.app_config.models_module.__file__, "a") as mf:
-            content = ModelTemplate.convert(
-                context={"name": self.new_model, "fields": fields}
+            content = self.get_content(
+                {"name": self.new_model, "fields": fields}, ModelTemplate()
             )
             mf.write(content)
         subprocess.call(["black", self.app_config.models_module.__file__, "-q"])
@@ -113,8 +113,9 @@ class Scaffold:
             {"rest_framework": ["serializers"], f"{self.app_config.name}": ["models"]},
         )
         with open(serializer_file_path, "a") as sf:
-            content = SerializerTemplate.convert(
-                context={"models": serializers, "imports": missing_imports}
+            content = self.get_content(
+                {"models": serializers, "imports": missing_imports},
+                SerializerTemplate(),
             )
             sf.write(content)
         subprocess.call(["black", serializer_file_path, "-q"])
@@ -128,8 +129,8 @@ class Scaffold:
         url_file_path = f"{self.app_config.module.__path__[0]}/urls.py"
         existing_models = self.get_model_names()
         with open(url_file_path, "w+") as uf:
-            content = UrlTemplate.convert(
-                context={"app": self.app_config.name, "models": existing_models}
+            content = self.get_content(
+                {"app": self.app_config.name, "models": existing_models}, UrlTemplate()
             )
             uf.write(content)
         subprocess.call(["black", url_file_path, "-q"])
@@ -166,8 +167,8 @@ class Scaffold:
             },
         )
         with open(view_file_path, "a") as wf:
-            content = ViewTemplate.convert(
-                context={"models": views, "imports": missing_imports}
+            content = self.get_content(
+                {"models": views, "imports": missing_imports}, ViewTemplate()
             )
             wf.write(content)
         subprocess.call(["black", view_file_path, "-q"])

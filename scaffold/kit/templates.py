@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from enum import Enum
 
 from django.template import Context, Template
@@ -25,38 +26,38 @@ class Field(Enum):
     Decimal = (DECIMAL_FIELD_TEMPLATE, ["name", "type", "max", "places"])
 
 
-class FieldTemplate:
-    @staticmethod
-    def convert(args):
-        type = args[1]
+class CommonTemplate(ABC):
+    @abstractmethod
+    def convert(self, context):
+        pass
+
+
+class FieldTemplate(CommonTemplate):
+    def convert(self, context):
+        type = context[1]
         try:
             pattern, options = Field[type].value[0], Field[type].value[1]
-            context = dict(zip(options, args))
         except KeyError:
             pattern, options = Field.Genl.value[0], Field.Genl.value[1]
-            context = dict(zip(options, args))
-        return Template(pattern).render(context=Context(context))
+        template_context = dict(zip(options, context))
+        return Template(pattern).render(context=Context(template_context))
 
 
-class ModelTemplate:
-    @staticmethod
-    def convert(context):
+class ModelTemplate(CommonTemplate):
+    def convert(self, context):
         return Template(MODEL_TEMPLATE).render(context=Context(context))
 
 
-class SerializerTemplate:
-    @staticmethod
-    def convert(context):
+class SerializerTemplate(CommonTemplate):
+    def convert(self, context):
         return Template(SERIALIZER_TEMPLATE).render(context=Context(context))
 
 
-class UrlTemplate:
-    @staticmethod
-    def convert(context):
+class UrlTemplate(CommonTemplate):
+    def convert(self, context):
         return Template(VIEW_SET_URL_TEMPLATE).render(context=Context(context))
 
 
-class ViewTemplate:
-    @staticmethod
-    def convert(context):
+class ViewTemplate(CommonTemplate):
+    def convert(self, context):
         return Template(VIEW_SET_VIEW_TEMPLATE).render(context=Context(context))
